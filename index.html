@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Telegram Meta Tags -->
+    <meta name="telegram-web-app" content="true">
+    <meta name="theme-color" content="#3390ec">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Регистрация в сервисе">
+    <meta property="og:description" content="Заполните форму для регистрации в нашем сервисе">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Регистрация в сервисе">
+    <meta name="twitter:description" content="Заполните форму для регистрации в нашем сервисе">
+    
+    <title>Регистрация в сервисе</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Input Mask Library -->
+    <script src="https://cdn.jsdelivr.net/npm/imask@7.1.3/dist/imask.min.js"></script>
+    
+    <style>
+        /* Telegram-like colors */
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #000000;
+            --tg-theme-hint-color: #999999;
+            --tg-theme-link-color: #3390ec;
+            --tg-theme-button-color: #3390ec;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #f1f1f1;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+        }
+        
+        .tg-button {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+        }
+        
+        .tg-button:hover {
+            opacity: 0.9;
+        }
+        
+        .tg-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .tg-input {
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+        
+        .tg-input:focus {
+            border-color: var(--tg-theme-button-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(51, 144, 236, 0.1);
+        }
+        
+        .tg-input.error {
+            border-color: #ff3333;
+        }
+        
+        .error-message {
+            color: #ff3333;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .success-message {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-out {
+            animation: fadeOut 0.3s ease-out;
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Checkbox styling */
+        .checkbox-wrapper {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-top: 0.125rem;
+            cursor: pointer;
+            accent-color: var(--tg-theme-button-color);
+        }
+        
+        .checkbox-wrapper label {
+            cursor: pointer;
+            line-height: 1.5;
+        }
+        
+        .checkbox-wrapper a {
+            color: var(--tg-theme-link-color);
+            text-decoration: underline;
+        }
+        
+        .checkbox-wrapper a:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm py-6 px-4">
+        <div class="max-w-2xl mx-auto">
+            <h1 class="text-3xl font-bold text-gray-900 text-center mb-2">
+                Добро пожаловать!
+            </h1>
+            <p class="text-gray-600 text-center">
+                Заполните форму регистрации для доступа к нашему сервису
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
+        <!-- Registration Form -->
+        <div id="registrationForm" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <form id="form" class="space-y-6">
+                <!-- First Name -->
+                <div>
+                    <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
+                        Имя <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="firstName"
+                        name="firstName"
+                        required
+                        class="tg-input w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-400"
+                        placeholder="Введите ваше имя"
+                    />
+                    <div id="firstNameError" class="error-message"></div>
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
+                        Фамилия <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="lastName"
+                        name="lastName"
+                        required
+                        class="tg-input w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-400"
+                        placeholder="Введите вашу фамилию"
+                    />
+                    <div id="lastNameError" class="error-message"></div>
+                </div>
+
+                <!-- Phone Number -->
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                        Номер телефона <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        required
+                        class="tg-input w-full px-4 py-3 rounded-lg text-gray-900 placeholder-gray-400"
+                        placeholder="+7 (999) 999-99-99"
+                    />
+                    <div id="phoneError" class="error-message"></div>
+                </div>
+
+                <!-- Checkboxes -->
+                <div class="space-y-4 pt-2">
+                    <div class="checkbox-wrapper">
+                        <input
+                            type="checkbox"
+                            id="agreement1"
+                            name="agreement1"
+                            required
+                            class="flex-shrink-0"
+                        />
+                        <label for="agreement1" class="text-sm text-gray-700">
+                            Я согласен с <a href="#offer" class="text-blue-500 hover:underline">Офертой</a>
+                        </label>
+                    </div>
+                    <div id="agreement1Error" class="error-message ml-7"></div>
+
+                    <div class="checkbox-wrapper">
+                        <input
+                            type="checkbox"
+                            id="agreement2"
+                            name="agreement2"
+                            required
+                            class="flex-shrink-0"
+                        />
+                        <label for="agreement2" class="text-sm text-gray-700">
+                            Я согласен с <a href="#privacy" class="text-blue-500 hover:underline">Политикой конфиденциальности</a>
+                        </label>
+                    </div>
+                    <div id="agreement2Error" class="error-message ml-7"></div>
+
+                    <div class="checkbox-wrapper">
+                        <input
+                            type="checkbox"
+                            id="agreement3"
+                            name="agreement3"
+                            required
+                            class="flex-shrink-0"
+                        />
+                        <label for="agreement3" class="text-sm text-gray-700">
+                            Я согласен с <a href="#data-processing" class="text-blue-500 hover:underline">Обработкой персональных данных</a>
+                        </label>
+                    </div>
+                    <div id="agreement3Error" class="error-message ml-7"></div>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    id="submitBtn"
+                    class="tg-button w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                    Отправить
+                </button>
+
+                <!-- Loading Indicator -->
+                <div id="loadingIndicator" class="hidden text-center py-4">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <p class="mt-2 text-gray-600">Отправка данных...</p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="success-message bg-green-50 border border-green-200 rounded-2xl p-8 text-center mt-6">
+            <div class="text-green-600 text-5xl mb-4">✓</div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Спасибо!</h2>
+            <p class="text-gray-700 text-lg">
+                Ваше согласие и данные успешно получены
+            </p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" class="bg-gray-50 border-t border-gray-200 mt-auto">
+        <div class="max-w-4xl mx-auto px-4 py-12">
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Offer -->
+                <div id="offer" class="scroll-mt-20">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Оферта</h3>
+                    <div class="text-sm text-gray-600 space-y-2">
+                        <p>
+                            Настоящая публичная оферта (далее — «Оферта») определяет условия использования сервиса.
+                        </p>
+                        <p>
+                            Используя наш сервис, вы соглашаетесь с условиями данной оферты.
+                        </p>
+                        <p>
+                            Мы оставляем за собой право изменять условия оферты в любое время без предварительного уведомления.
+                        </p>
+                        <p>
+                            Все изменения вступают в силу с момента публикации на данной странице.
+                        </p>
+                        <p>
+                            При возникновении споров стороны обязуются решать их путем переговоров.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Privacy Policy -->
+                <div id="privacy" class="scroll-mt-20">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Политика конфиденциальности</h3>
+                    <div class="text-sm text-gray-600 space-y-2">
+                        <p>
+                            Мы обязуемся защищать вашу конфиденциальность и персональные данные.
+                        </p>
+                        <p>
+                            Мы собираем только ту информацию, которая необходима для предоставления наших услуг.
+                        </p>
+                        <p>
+                            Ваши данные не передаются третьим лицам без вашего согласия, за исключением случаев, предусмотренных законодательством.
+                        </p>
+                        <p>
+                            Мы используем современные технологии для защиты ваших данных от несанкционированного доступа.
+                        </p>
+                        <p>
+                            Вы имеете право запросить информацию о ваших персональных данных и потребовать их удаления.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Data Processing -->
+                <div id="data-processing" class="scroll-mt-20">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Обработка персональных данных</h3>
+                    <div class="text-sm text-gray-600 space-y-2">
+                        <p>
+                            Обработка персональных данных осуществляется в соответствии с законодательством РФ.
+                        </p>
+                        <p>
+                            Цель обработки: предоставление услуг сервиса, улучшение качества обслуживания.
+                        </p>
+                        <p>
+                            Мы обрабатываем следующие данные: имя, фамилия, номер телефона.
+                        </p>
+                        <p>
+                            Срок хранения данных: до момента отзыва согласия на обработку.
+                        </p>
+                        <p>
+                            Вы можете отозвать согласие на обработку данных в любое время, отправив запрос на наш email.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
+                <p>&copy; 2025 Все права защищены</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Configuration
+        const WEBHOOK_URL = 'https://api.watbot.ru/hook/4122004:YXFYxr8vTlnvk2PjGSRpUgkNRhgIAGEFwtbuzjaMxafzUWjO';
+        
+        // DOM Elements
+        const form = document.getElementById('form');
+        const registrationForm = document.getElementById('registrationForm');
+        const successMessage = document.getElementById('successMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        
+        // Input elements
+        const firstNameInput = document.getElementById('firstName');
+        const lastNameInput = document.getElementById('lastName');
+        const phoneInput = document.getElementById('phone');
+        const agreement1 = document.getElementById('agreement1');
+        const agreement2 = document.getElementById('agreement2');
+        const agreement3 = document.getElementById('agreement3');
+        
+        // Error elements
+        const firstNameError = document.getElementById('firstNameError');
+        const lastNameError = document.getElementById('lastNameError');
+        const phoneError = document.getElementById('phoneError');
+        const agreement1Error = document.getElementById('agreement1Error');
+        const agreement2Error = document.getElementById('agreement2Error');
+        const agreement3Error = document.getElementById('agreement3Error');
+        
+        // Phone mask initialization
+        const phoneMask = IMask(phoneInput, {
+            mask: '+{7} (000) 000-00-00',
+            lazy: false
+        });
+        
+        // Validation functions
+        function validateFirstName() {
+            const value = firstNameInput.value.trim();
+            if (!value) {
+                showError(firstNameInput, firstNameError, 'Поле "Имя" обязательно для заполнения');
+                return false;
+            }
+            if (value.length < 2) {
+                showError(firstNameInput, firstNameError, 'Имя должно содержать минимум 2 символа');
+                return false;
+            }
+            hideError(firstNameInput, firstNameError);
+            return true;
+        }
+        
+        function validateLastName() {
+            const value = lastNameInput.value.trim();
+            if (!value) {
+                showError(lastNameInput, lastNameError, 'Поле "Фамилия" обязательно для заполнения');
+                return false;
+            }
+            if (value.length < 2) {
+                showError(lastNameInput, lastNameError, 'Фамилия должна содержать минимум 2 символа');
+                return false;
+            }
+            hideError(lastNameInput, lastNameError);
+            return true;
+        }
+        
+        function validatePhone() {
+            const value = phoneMask.unmaskedValue;
+            if (!value || value.length !== 11) {
+                showError(phoneInput, phoneError, 'Введите корректный номер телефона');
+                return false;
+            }
+            hideError(phoneInput, phoneError);
+            return true;
+        }
+        
+        function validateCheckboxes() {
+            let isValid = true;
+            
+            if (!agreement1.checked) {
+                agreement1Error.textContent = 'Необходимо согласие с Офертой';
+                isValid = false;
+            } else {
+                agreement1Error.textContent = '';
+            }
+            
+            if (!agreement2.checked) {
+                agreement2Error.textContent = 'Необходимо согласие с Политикой конфиденциальности';
+                isValid = false;
+            } else {
+                agreement2Error.textContent = '';
+            }
+            
+            if (!agreement3.checked) {
+                agreement3Error.textContent = 'Необходимо согласие с Обработкой персональных данных';
+                isValid = false;
+            } else {
+                agreement3Error.textContent = '';
+            }
+            
+            return isValid;
+        }
+        
+        function showError(input, errorElement, message) {
+            input.classList.add('error');
+            errorElement.textContent = message;
+        }
+        
+        function hideError(input, errorElement) {
+            input.classList.remove('error');
+            errorElement.textContent = '';
+        }
+        
+        // Real-time validation
+        firstNameInput.addEventListener('blur', validateFirstName);
+        lastNameInput.addEventListener('blur', validateLastName);
+        phoneInput.addEventListener('blur', validatePhone);
+        
+        agreement1.addEventListener('change', () => {
+            if (agreement1.checked) {
+                agreement1Error.textContent = '';
+            }
+        });
+        
+        agreement2.addEventListener('change', () => {
+            if (agreement2.checked) {
+                agreement2Error.textContent = '';
+            }
+        });
+        
+        agreement3.addEventListener('change', () => {
+            if (agreement3.checked) {
+                agreement3Error.textContent = '';
+            }
+        });
+        
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate all fields
+            const isFirstNameValid = validateFirstName();
+            const isLastNameValid = validateLastName();
+            const isPhoneValid = validatePhone();
+            const areCheckboxesValid = validateCheckboxes();
+            
+            if (!isFirstNameValid || !isLastNameValid || !isPhoneValid || !areCheckboxesValid) {
+                // Scroll to first error
+                const firstError = document.querySelector('.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            // Prepare data
+            const formData = {
+                firstName: firstNameInput.value.trim(),
+                lastName: lastNameInput.value.trim(),
+                phone: phoneMask.unmaskedValue
+            };
+            
+            // Disable submit button and show loading
+            submitBtn.disabled = true;
+            loadingIndicator.classList.remove('hidden');
+            
+            try {
+                // Check if webhook URL is configured
+                if (!WEBHOOK_URL || WEBHOOK_URL === 'ВСТАВЬ_ТВОЙ_WEBHOOK_URL_ОТ_WATBOT') {
+                    throw new Error('Webhook URL не настроен. Пожалуйста, укажите URL вебхука в файле index.html');
+                }
+                
+                // Send POST request to webhook
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
+                }
+                
+                // Success - hide form and show success message
+                registrationForm.classList.add('fade-out');
+                setTimeout(() => {
+                    registrationForm.style.display = 'none';
+                    successMessage.classList.add('show');
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // Show error message
+                alert(`Произошла ошибка при отправке данных: ${error.message}\n\nПожалуйста, попробуйте еще раз или свяжитесь с поддержкой.`);
+                
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Telegram Web App initialization (if available)
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            
+            // Set theme colors
+            if (tg.themeParams) {
+                document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
+                document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
+                document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#3390ec');
+                document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
+            }
+        }
+    </script>
+</body>
+</html>
+
