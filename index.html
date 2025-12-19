@@ -500,70 +500,45 @@
         // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Validate all fields
-            const isFirstNameValid = validateFirstName();
-            const isLastNameValid = validateLastName();
-            const isPhoneValid = validatePhone();
-            const areCheckboxesValid = validateCheckboxes();
-            
-            if (!isFirstNameValid || !isLastNameValid || !isPhoneValid || !areCheckboxesValid) {
-                // Scroll to first error
-                const firstError = document.querySelector('.error');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-                return;
-            }
-            
-            // Prepare data
-            const formData = {
-                firstName: firstNameInput.value.trim(),
-                lastName: lastNameInput.value.trim(),
-                phone: phoneMask.unmaskedValue
+            hideFatal();
+            success.classList.add('hidden');
+          
+            const { ok, data } = validate();
+            if (!ok) return;
+          
+            const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+            const initData = tg ? (tg.initData || '') : '';
+            const initDataUnsafe = tg ? (tg.initDataUnsafe || null) : null;
+          
+            const payload = {
+              ...data,
+              telegram: {
+                initData,
+                user: initDataUnsafe && initDataUnsafe.user ? initDataUnsafe.user : null
+              }
             };
-            
-            // Disable submit button and show loading
+          
             submitBtn.disabled = true;
-            loadingIndicator.classList.remove('hidden');
-            
+            loader.classList.remove('hidden');
+          
             try {
-                // Check if webhook URL is configured
-                if (!WEBHOOK_URL || WEBHOOK_URL === 'ВСТАВЬ_ТВОЙ_WEBHOOK_URL_ОТ_WATBOT') {
-                    throw new Error('Webhook URL не настроен. Пожалуйста, укажите URL вебхука в файле index.html');
-                }
-                
-                // Send POST request to webhook
-                const response = await fetch('/api/submit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                  });
-                  
-                
-                if (!response.ok) {
-                    throw new Error(`Ошибка сервера: ${response.status} ${response.statusText}`);
-                }
-                
-                // Success - hide form and show success message
-                registrationForm.classList.add('fade-out');
-                setTimeout(() => {
-                    registrationForm.style.display = 'none';
-                    successMessage.classList.add('show');
-                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
-                
-            } catch (error) {
-                console.error('Error:', error);
-                
-                // Show error message
-                alert(`Произошла ошибка при отправке данных: ${error.message}\n\nПожалуйста, попробуйте еще раз или свяжитесь с поддержкой.`);
-                
-                // Re-enable submit button
-                submitBtn.disabled = false;
-                loadingIndicator.classList.add('hidden');
+              await fetch('/api/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              });
+          
+              form.classList.add('hidden');
+              success.classList.remove('hidden');
+              if (tg) { try { tg.close(); } catch (_) {} }
+            } catch (err) {
+              showFatal(`Не удалось отправить данные: ${err && err.message ? err.message : 'неизвестная ошибка'}`);
+            } finally {
+              submitBtn.disabled = false;
+              loader.classList.add('hidden');
             }
-        });
+          });
+          
         
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
