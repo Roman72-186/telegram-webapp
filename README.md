@@ -59,3 +59,8 @@
 ## Деплой
 
 Проект готов для деплоя на Vercel. Для корректной работы необходимо убедиться, что вебхук в Leadteh настроен правильно.
+
+## Ссылки
+
+- [GitHub](https://github.com/Roman72-186/telegram-webapp)
+- [Vercel](https://telegram-webapp.vercel.app)
