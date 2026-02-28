@@ -427,6 +427,38 @@
         document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
       }
     }
+
+    // ===== Предзаполнение формы из Leadteh =====
+    (async function prefillForm() {
+      try {
+        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        const telegramId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user
+          ? tg.initDataUnsafe.user.id
+          : (window.DEV_TELEGRAM_ID || null);
+
+        if (!telegramId) return;
+
+        const res = await fetch('/api/contact?telegram_id=' + encodeURIComponent(telegramId));
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (!data.found) return;
+
+        if (data.firstName) firstNameInput.value = data.firstName;
+        if (data.lastName) lastNameInput.value = data.lastName;
+        if (data.phone) {
+          // Очищаем телефон до цифр и подставляем в маску
+          const digits = data.phone.replace(/\D/g, '');
+          if (/^7\d{10}$/.test(digits)) {
+            phoneMask.unmaskedValue = digits;
+          } else if (/^\d{10}$/.test(digits)) {
+            phoneMask.unmaskedValue = '7' + digits;
+          }
+        }
+      } catch (_) {
+        // Ошибка предзаполнения не блокирует форму
+      }
+    })();
   </script>
 </body>
 </html>

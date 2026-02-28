@@ -9,7 +9,7 @@ Telegram Mini App для регистрации пользователей и о
 ## Стек технологий
 
 - **Frontend:** HTML5, Tailwind CSS (CDN), vanilla JavaScript, IMask.js (v7.1.3)
-- **Backend:** Vercel Serverless Functions (Node.js) — `api/submit.js`
+- **Backend:** Vercel Serverless Functions (Node.js) — `api/submit.js`, `api/contact.js`
 - **Деплой:** Vercel (автодеплой при push в main)
 - **Интеграции:** Telegram Web App API, Leadteh CRM (Inner Webhook)
 - **Репозиторий:** https://github.com/Roman72-186/telegram-webapp.git
@@ -20,7 +20,8 @@ Telegram Mini App для регистрации пользователей и о
 ```
 ├── index.html              — Основная страница с формой регистрации
 ├── api/
-│   └── submit.js           — Serverless API (валидация + отправка в Leadteh)
+│   ├── submit.js           — Serverless API (валидация + отправка в Leadteh)
+│   └── contact.js          — Serverless API (предзаполнение формы по telegram_id из Leadteh)
 ├── setup.js                — Мастер установки (webhook, ссылки на документы, деплой)
 ├── install.bat             — Bootstrap-скрипт для Windows (установка Git/Node + клон + setup)
 ├── install.sh              — Bootstrap-скрипт для macOS/Linux (установка Git/Node + клон + setup)
@@ -37,6 +38,7 @@ Telegram Mini App для регистрации пользователей и о
 
 ```
 Telegram Bot → Кнопка "Web App" → index.html (форма)
+    ← GET /api/contact (предзаполнение из Leadteh API по telegram_id)
     → POST /api/submit (Vercel Function)
     → Leadteh webhook (CRM)
     → Ответ пользователю
@@ -57,6 +59,7 @@ API ищет контакт в Leadteh по `telegram_id` и обновляет 
 - Нет package.json — проект не требует `npm install`
 - Тема адаптируется к Telegram (тёмная/светлая через CSS-переменные)
 - Ссылки на документы (оферта, политика, обработка данных) — внешние, открываются в браузере (`target="_blank"`)
+- `api/contact.js` — предзаполнение формы по `telegram_id` через Leadteh REST API (`GET /api/v1/getContacts`). Токен `LEADTEH_API_TOKEN` хранится в env-переменной Vercel (не в коде)
 - В `index.html` используются плейсхолдеры `__OFFER_URL__`, `__PRIVACY_URL__`, `__DATA_PROCESSING_URL__` — заменяются на реальные URL при установке через `setup.js`
 - При установке (`setup.js`) любой документ можно пропустить (Enter) — его чекбокс будет удалён из формы. Блоки обёрнуты в HTML-маркеры `<!-- BLOCK:OFFER -->`, `<!-- BLOCK:PRIVACY -->`, `<!-- BLOCK:DATA_PROCESSING -->`. JS-валидация null-safe — не падает если чекбокс отсутствует
 
