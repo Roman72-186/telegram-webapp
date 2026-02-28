@@ -166,29 +166,35 @@
 
         <!-- Checkboxes -->
         <div class="space-y-4 pt-2">
+          <!-- BLOCK:OFFER -->
           <div class="checkbox-wrapper">
             <input type="checkbox" id="agreement1" name="agreement1" class="flex-shrink-0" />
             <label for="agreement1" class="text-sm text-gray-700">
-              Я согласен с <a href="offer.html">Офертой</a>
+              Я согласен с <a href="__OFFER_URL__" target="_blank" rel="noopener noreferrer">Офертой</a>
             </label>
           </div>
           <div id="agreement1Error" class="error-message ml-7"></div>
+          <!-- /BLOCK:OFFER -->
 
+          <!-- BLOCK:PRIVACY -->
           <div class="checkbox-wrapper">
             <input type="checkbox" id="agreement2" name="agreement2" class="flex-shrink-0" />
             <label for="agreement2" class="text-sm text-gray-700">
-              Я согласен с <a href="privacy.html">Политикой конфиденциальности</a>
+              Я согласен с <a href="__PRIVACY_URL__" target="_blank" rel="noopener noreferrer">Политикой конфиденциальности</a>
             </label>
           </div>
           <div id="agreement2Error" class="error-message ml-7"></div>
+          <!-- /BLOCK:PRIVACY -->
 
+          <!-- BLOCK:DATA_PROCESSING -->
           <div class="checkbox-wrapper">
             <input type="checkbox" id="agreement3" name="agreement3" class="flex-shrink-0" />
             <label for="agreement3" class="text-sm text-gray-700">
-              Я согласен с <a href="data-processing.html">Обработкой персональных данных</a>
+              Я согласен с <a href="__DATA_PROCESSING_URL__" target="_blank" rel="noopener noreferrer">Обработкой персональных данных</a>
             </label>
           </div>
           <div id="agreement3Error" class="error-message ml-7"></div>
+          <!-- /BLOCK:DATA_PROCESSING -->
         </div>
 
         <!-- Submit -->
@@ -222,7 +228,7 @@
   <!-- Footer -->
   <footer id="footer" class="bg-gray-50 border-t border-gray-200 mt-auto">
     <div class="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
-      <p>&copy; 2025 Все права защищены</p>
+      <p>&copy; 2026 Все права защищены</p>
     </div>
   </footer>
 
@@ -305,14 +311,14 @@
     function validateCheckboxes() {
       let ok = true;
 
-      if (!agreement1.checked) { agreement1Error.textContent = 'Необходимо согласие с Офертой'; ok = false; }
-      else agreement1Error.textContent = '';
+      if (agreement1 && !agreement1.checked) { if (agreement1Error) agreement1Error.textContent = 'Необходимо согласие с Офертой'; ok = false; }
+      else if (agreement1Error) agreement1Error.textContent = '';
 
-      if (!agreement2.checked) { agreement2Error.textContent = 'Необходимо согласие с Политикой конфиденциальности'; ok = false; }
-      else agreement2Error.textContent = '';
+      if (agreement2 && !agreement2.checked) { if (agreement2Error) agreement2Error.textContent = 'Необходимо согласие с Политикой конфиденциальности'; ok = false; }
+      else if (agreement2Error) agreement2Error.textContent = '';
 
-      if (!agreement3.checked) { agreement3Error.textContent = 'Необходимо согласие с Обработкой персональных данных'; ok = false; }
-      else agreement3Error.textContent = '';
+      if (agreement3 && !agreement3.checked) { if (agreement3Error) agreement3Error.textContent = 'Необходимо согласие с Обработкой персональных данных'; ok = false; }
+      else if (agreement3Error) agreement3Error.textContent = '';
 
       return ok;
     }
@@ -328,9 +334,9 @@
     lastNameInput.addEventListener('blur', validateLastName);
     phoneInput.addEventListener('blur', validatePhone);
 
-    agreement1.addEventListener('change', () => { if (agreement1.checked) agreement1Error.textContent = ''; });
-    agreement2.addEventListener('change', () => { if (agreement2.checked) agreement2Error.textContent = ''; });
-    agreement3.addEventListener('change', () => { if (agreement3.checked) agreement3Error.textContent = ''; });
+    if (agreement1) agreement1.addEventListener('change', () => { if (agreement1.checked && agreement1Error) agreement1Error.textContent = ''; });
+    if (agreement2) agreement2.addEventListener('change', () => { if (agreement2.checked && agreement2Error) agreement2Error.textContent = ''; });
+    if (agreement3) agreement3.addEventListener('change', () => { if (agreement3.checked && agreement3Error) agreement3Error.textContent = ''; });
 
     // ===== Submit =====
     form.addEventListener('submit', async (e) => {

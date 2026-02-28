@@ -9,6 +9,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const SUBMIT_FILE = path.join(__dirname, 'api', 'submit.js');
+const INDEX_FILE = path.join(__dirname, 'index.html');
 const WEBHOOK_PATTERN = /https:\/\/[a-zA-Z0-9.-]+\.leadteh\.ru\/inner_webhook\/[a-zA-Z0-9-]+/;
 
 function printBanner() {
@@ -99,6 +100,91 @@ function replaceWebhookUrl(newUrl) {
 
   console.log('');
   console.log('Webhook URL обновлён в api/submit.js — OK');
+}
+
+function isValidUrl(url) {
+  return /^https?:\/\/.+/.test(url.trim());
+}
+
+async function askDocumentUrls(rl) {
+  console.log('');
+  console.log('Укажите ссылки на ваши документы (оферта, политика, обработка данных).');
+  console.log('Ссылки будут открываться в браузере пользователя.');
+  console.log('Формат: https://example.com/document или ссылка на Google Docs и т.д.');
+  console.log('');
+  console.log('Если документ не нужен — нажмите Enter, чтобы пропустить.');
+  console.log('Соответствующий чекбокс не будет показан в форме.');
+  console.log('');
+
+  const docs = [
+    { placeholder: '__OFFER_URL__', label: 'URL оферты', block: 'OFFER' },
+    { placeholder: '__PRIVACY_URL__', label: 'URL политики конфиденциальности', block: 'PRIVACY' },
+    { placeholder: '__DATA_PROCESSING_URL__', label: 'URL согласия на обработку данных', block: 'DATA_PROCESSING' },
+  ];
+
+  const urls = {};
+
+  for (const doc of docs) {
+    while (true) {
+      const url = await ask(rl, `${doc.label} (Enter — пропустить): `);
+      if (!url.trim()) {
+        urls[doc.placeholder] = null;
+        console.log(`  → ${doc.label} пропущен, чекбокс будет скрыт`);
+        break;
+      }
+      if (isValidUrl(url)) {
+        urls[doc.placeholder] = url.trim();
+        break;
+      }
+      console.log('Неверный формат. URL должен начинаться с http:// или https://');
+    }
+  }
+
+  return urls;
+}
+
+// Маппинг плейсхолдеров на имена блоков
+const PLACEHOLDER_TO_BLOCK = {
+  '__OFFER_URL__': 'OFFER',
+  '__PRIVACY_URL__': 'PRIVACY',
+  '__DATA_PROCESSING_URL__': 'DATA_PROCESSING',
+};
+
+function replaceDocumentUrls(urls) {
+  if (!fs.existsSync(INDEX_FILE)) {
+    console.error(`Ошибка: файл ${INDEX_FILE} не найден.`);
+    console.error('Убедитесь, что вы запускаете скрипт из корня проекта.');
+    process.exit(1);
+  }
+
+  let content = fs.readFileSync(INDEX_FILE, 'utf-8');
+
+  for (const [placeholder, url] of Object.entries(urls)) {
+    const blockName = PLACEHOLDER_TO_BLOCK[placeholder];
+    if (url === null && blockName) {
+      // Удаляем весь блок <!-- BLOCK:XXX -->...<!-- /BLOCK:XXX -->
+      const blockRegex = new RegExp(
+        `\\s*<!-- BLOCK:${blockName} -->[\\s\\S]*?<!-- /BLOCK:${blockName} -->`,
+        'g'
+      );
+      content = content.replace(blockRegex, '');
+    } else if (url && blockName) {
+      // Подставляем URL и убираем маркеры
+      content = content.replace(placeholder, url);
+      content = content.replace(new RegExp(`\\s*<!-- BLOCK:${blockName} -->`, 'g'), '');
+      content = content.replace(new RegExp(`\\s*<!-- /BLOCK:${blockName} -->`, 'g'), '');
+    }
+  }
+
+  fs.writeFileSync(INDEX_FILE, content, 'utf-8');
+
+  const skipped = Object.values(urls).filter((u) => u === null).length;
+  console.log('');
+  if (skipped > 0) {
+    console.log(`Ссылки на документы обновлены в index.html — OK (пропущено: ${skipped})`);
+  } else {
+    console.log('Ссылки на документы обновлены в index.html — OK');
+  }
 }
 
 function isVercelInstalled() {
@@ -210,7 +296,7 @@ async function main() {
   printBanner();
 
   // Шаг 1: Проверка окружения
-  console.log('[1/5] Проверка окружения...');
+  console.log('[1/6] Проверка окружения...');
   checkNodeVersion();
   checkGit();
 
@@ -222,20 +308,26 @@ async function main() {
   try {
     // Шаг 2: Запрос Webhook URL
     console.log('');
-    console.log('[2/5] Настройка Webhook URL...');
+    console.log('[2/6] Настройка Webhook URL...');
     const webhookUrl = await askWebhookUrl(rl);
 
-    // Шаг 3: Подстановка в код
-    console.log('[3/5] Обновление конфигурации...');
+    // Шаг 3: Подстановка webhook в код
+    console.log('[3/6] Обновление конфигурации...');
     replaceWebhookUrl(webhookUrl);
 
-    // Шаг 4: Проверка Vercel CLI
+    // Шаг 4: Ссылки на документы
     console.log('');
-    console.log('[4/5] Проверка Vercel CLI...');
+    console.log('[4/6] Настройка ссылок на документы...');
+    const docUrls = await askDocumentUrls(rl);
+    replaceDocumentUrls(docUrls);
+
+    // Шаг 5: Проверка Vercel CLI
+    console.log('');
+    console.log('[5/6] Проверка Vercel CLI...');
     await ensureVercel(rl);
 
-    // Шаг 5: Деплой
-    console.log('[5/5] Деплой на Vercel...');
+    // Шаг 6: Деплой
+    console.log('[6/6] Деплой на Vercel...');
     const deployUrl = await deployToVercel(rl);
 
     // Финал
