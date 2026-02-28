@@ -13,7 +13,7 @@ Telegram Mini App для регистрации пользователей и о
 - **Деплой:** Vercel (автодеплой при push в main)
 - **Интеграции:** Telegram Web App API, Leadteh CRM (Inner Webhook)
 - **Репозиторий:** https://github.com/Roman72-186/telegram-webapp.git
-- **Продакшн URL:** https://telegram-webapp.vercel.app
+- **Продакшн URL:** https://tg-registration.vercel.app
 
 ## Структура проекта
 
@@ -139,7 +139,7 @@ vercel --prod
 После пуша в main Vercel автоматически собирает и деплоит проект.
 Проверить статус: https://vercel.com/dashboard → выбрать проект → Deployments.
 
-Продакшн: https://telegram-webapp.vercel.app
+Продакшн: https://tg-registration.vercel.app
 
 ## Тестирование
 
