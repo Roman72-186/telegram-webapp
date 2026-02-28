@@ -25,26 +25,28 @@ if %errorlevel%==0 (
 echo Git не найден. Пробую установить...
 
 where winget >nul 2>&1
-if %errorlevel%==0 (
-    echo Устанавливаю Git через winget...
-    winget install Git.Git --accept-source-agreements --accept-package-agreements
-    if %errorlevel%==0 (
-        echo Git установлен. Обновляю PATH...
-        call :refresh_path
-        where git >nul 2>&1
-        if %errorlevel%==0 (
-            echo Git доступен — OK
-            goto :check_node
-        )
-        echo Git установлен, но не найден в PATH.
-        echo Попробуйте закрыть и открыть скрипт заново.
-        pause
-        exit /b 1
-    ) else (
-        echo Ошибка при установке Git через winget.
-    )
-)
+if %errorlevel% neq 0 goto :git_manual
 
+echo Устанавливаю Git через winget...
+winget install Git.Git --accept-source-agreements --accept-package-agreements
+if %errorlevel% neq 0 goto :git_manual
+
+echo Git установлен. Обновляю PATH...
+call :refresh_path
+
+where git >nul 2>&1
+if %errorlevel% neq 0 goto :git_path_fail
+
+echo Git доступен — OK
+goto :check_node
+
+:git_path_fail
+echo Git установлен, но не найден в PATH.
+echo Попробуйте закрыть и открыть скрипт заново.
+pause
+exit /b 1
+
+:git_manual
 echo.
 echo Не удалось установить Git автоматически.
 echo Пожалуйста, установите Git вручную:
@@ -83,26 +85,28 @@ echo Node.js найден, но версия %NODE_VER% слишком стар�
 echo Node.js не найден или версия устарела. Пробую установить...
 
 where winget >nul 2>&1
-if %errorlevel%==0 (
-    echo Устанавливаю Node.js LTS через winget...
-    winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
-    if %errorlevel%==0 (
-        echo Node.js установлен. Обновляю PATH...
-        call :refresh_path
-        where node >nul 2>&1
-        if %errorlevel%==0 (
-            echo Node.js доступен — OK
-            goto :clone_repo
-        )
-        echo Node.js установлен, но не найден в PATH.
-        echo Попробуйте закрыть и открыть скрипт заново.
-        pause
-        exit /b 1
-    ) else (
-        echo Ошибка при установке Node.js через winget.
-    )
-)
+if %errorlevel% neq 0 goto :node_manual
 
+echo Устанавливаю Node.js LTS через winget...
+winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
+if %errorlevel% neq 0 goto :node_manual
+
+echo Node.js установлен. Обновляю PATH...
+call :refresh_path
+
+where node >nul 2>&1
+if %errorlevel% neq 0 goto :node_path_fail
+
+echo Node.js доступен — OK
+goto :clone_repo
+
+:node_path_fail
+echo Node.js установлен, но не найден в PATH.
+echo Попробуйте закрыть и открыть скрипт заново.
+pause
+exit /b 1
+
+:node_manual
 echo.
 echo Не удалось установить Node.js автоматически.
 echo Пожалуйста, установите Node.js LTS вручную:
