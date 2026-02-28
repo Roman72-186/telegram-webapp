@@ -292,11 +292,43 @@ function printFinish(deployUrl) {
   console.log('');
 }
 
+async function askApiToken(rl) {
+  console.log('');
+  console.log('API-токен нужен для предзаполнения формы данными из Leadteh.');
+  console.log('Где найти: Leadteh → Настройки → API → Скопировать токен');
+  console.log('');
+
+  const token = await ask(rl, 'Введите API-токен Leadteh (Enter — пропустить): ');
+  const trimmed = (token || '').trim();
+
+  if (!trimmed) {
+    console.log('  → Пропущено. Предзаполнение формы работать не будет.');
+    console.log('  → Вы можете добавить переменную LEADTEH_API_TOKEN позже');
+    console.log('    в Vercel Dashboard → Project → Settings → Environment Variables');
+    return null;
+  }
+
+  return trimmed;
+}
+
+function setVercelEnvVar(name, value) {
+  // Удаляем если уже есть (игнорируем ошибку если не было)
+  try {
+    execSync(`vercel env rm ${name} production --yes`, { stdio: 'pipe' });
+  } catch {}
+
+  // Добавляем переменную, значение передаём через stdin
+  execSync(`vercel env add ${name} production`, {
+    input: value,
+    stdio: ['pipe', 'pipe', 'inherit'],
+  });
+}
+
 async function main() {
   printBanner();
 
   // Шаг 1: Проверка окружения
-  console.log('[1/6] Проверка окружения...');
+  console.log('[1/7] Проверка окружения...');
   checkNodeVersion();
   checkGit();
 
@@ -308,27 +340,64 @@ async function main() {
   try {
     // Шаг 2: Запрос Webhook URL
     console.log('');
-    console.log('[2/6] Настройка Webhook URL...');
+    console.log('[2/7] Настройка Webhook URL...');
     const webhookUrl = await askWebhookUrl(rl);
 
     // Шаг 3: Подстановка webhook в код
-    console.log('[3/6] Обновление конфигурации...');
+    console.log('[3/7] Обновление конфигурации...');
     replaceWebhookUrl(webhookUrl);
 
     // Шаг 4: Ссылки на документы
     console.log('');
-    console.log('[4/6] Настройка ссылок на документы...');
+    console.log('[4/7] Настройка ссылок на документы...');
     const docUrls = await askDocumentUrls(rl);
     replaceDocumentUrls(docUrls);
 
-    // Шаг 5: Проверка Vercel CLI
+    // Шаг 5: API-токен Leadteh
     console.log('');
-    console.log('[5/6] Проверка Vercel CLI...');
+    console.log('[5/7] API-токен Leadteh (для предзаполнения формы)...');
+    const apiToken = await askApiToken(rl);
+
+    // Шаг 6: Проверка Vercel CLI
+    console.log('');
+    console.log('[6/7] Проверка Vercel CLI...');
     await ensureVercel(rl);
 
-    // Шаг 6: Деплой
-    console.log('[6/6] Деплой на Vercel...');
+    // Шаг 7: Деплой
+    console.log('[7/7] Деплой на Vercel...');
     const deployUrl = await deployToVercel(rl);
+
+    // Установка env-переменной после деплоя (проект уже привязан к Vercel)
+    if (apiToken && deployUrl && isVercelInstalled()) {
+      console.log('');
+      console.log('Устанавливаю переменную LEADTEH_API_TOKEN на Vercel...');
+      try {
+        setVercelEnvVar('LEADTEH_API_TOKEN', apiToken);
+        console.log('LEADTEH_API_TOKEN установлен — OK');
+        console.log('');
+        console.log('Повторный деплой для применения переменной...');
+        try {
+          execSync('vercel --prod --yes', {
+            stdio: ['inherit', 'pipe', 'inherit'],
+            encoding: 'utf-8',
+          });
+          console.log('Переменная применена — OK');
+        } catch {
+          console.log('Не удалось повторно задеплоить. Выполните вручную: vercel --prod');
+        }
+      } catch {
+        console.log('Не удалось установить переменную автоматически.');
+        console.log('Добавьте вручную в Vercel Dashboard → Settings → Environment Variables:');
+        console.log('  Имя: LEADTEH_API_TOKEN');
+        console.log(`  Значение: ${apiToken}`);
+      }
+    } else if (apiToken && !deployUrl) {
+      console.log('');
+      console.log('После деплоя добавьте переменную LEADTEH_API_TOKEN в Vercel:');
+      console.log('  Vercel Dashboard → Project → Settings → Environment Variables');
+      console.log('  Имя: LEADTEH_API_TOKEN');
+      console.log(`  Значение: ${apiToken}`);
+    }
 
     // Финал
     printFinish(deployUrl);
