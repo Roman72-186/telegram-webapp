@@ -52,7 +52,7 @@ API ищет контакт в Leadteh по `telegram_id` и обновляет 
 - Язык интерфейса и комментариев — **русский**
 - Телефон — только российский формат: `+7 (XXX) XXX-XX-XX`, отправляется как `+7XXXXXXXXXX`
 - Форма требует заполнения всех полей + 3 чекбокса согласий
-- Webhook URL захардкожен в `api/submit.js` (строка 10): `485f8213-edeb-43db-8fc2-febd8715f7a7`
+- Webhook URL захардкожен в `api/submit.js` (строка 10): `4889c51b-0bd8-42bd-979e-3bf67dbcece5`
 - Tailwind подключён через CDN, без сборки
 - Нет package.json — проект не требует `npm install`
 - Тема адаптируется к Telegram (тёмная/светлая через CSS-переменные)
@@ -148,8 +148,8 @@ vercel --prod
 
 ## Интеграция с Leadteh
 
-- **Аккаунт:** rb786743.leadteh.ru
-- **Webhook URL:** `https://rb786743.leadteh.ru/inner_webhook/485f8213-edeb-43db-8fc2-febd8715f7a7`
+- **Аккаунт:** rb257034.leadteh.ru
+- **Webhook URL:** `https://rb257034.leadteh.ru/inner_webhook/4889c51b-0bd8-42bd-979e-3bf67dbcece5`
 - **Поиск контакта:** по полю `telegram_id` (параметры `contact_by` + `search`)
 - **Передаваемые переменные:**
 

@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
     }
 
     // Используем вебхук Leadteh напрямую
-    const WEBHOOK_URL = 'https://rb786743.leadteh.ru/inner_webhook/485f8213-edeb-43db-8fc2-febd8715f7a7';
+    const WEBHOOK_URL = 'https://rb257034.leadteh.ru/inner_webhook/4889c51b-0bd8-42bd-979e-3bf67dbcece5';
 
     let body = req.body;
     if (typeof body === 'string') {
