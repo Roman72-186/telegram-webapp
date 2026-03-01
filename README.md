@@ -9,18 +9,24 @@
 ## Особенности
 
 - Интеграция с Telegram Web App API
-- Валидация данных формы
-- Маска для ввода номера телефона
+- Валидация данных формы (клиент + сервер)
+- Маска для ввода номера телефона (+7 формат)
 - Отправка данных в Leadteh с идентификацией по telegram_id
-- Адаптивный дизайн
+- Предзаполнение формы из Leadteh API (по telegram_id)
+- Верификация запросов через HMAC-SHA256 подпись Telegram initData (опционально)
+- Адаптивный дизайн с поддержкой тёмной темы Telegram
+- Мастер установки `setup.js` (8 шагов — webhook, документы, токены, деплой)
+- Bootstrap-скрипты `install.bat` / `install.sh` для установки с нуля
 
 ## Структура проекта
 
-- `index.html` - основная страница с формой регистрации
-- `api/submit.js` - серверная функция для обработки отправки формы и интеграции с Leadteh
-- `vercel.json` - конфигурационный файл для Vercel
-- `LEADTEX_INTEGRATION.md` - инструкция по интеграции с Leadteh
-- `TESTING_INSTRUCTIONS.md` - инструкция по тестированию интеграции
+- `index.html` — основная страница с формой регистрации
+- `api/submit.js` — серверная функция (валидация, верификация initData, отправка в Leadteh)
+- `api/contact.js` — серверная функция (предзаполнение формы по telegram_id из Leadteh)
+- `setup.js` — мастер установки (webhook, ссылки на документы, токены, деплой) — 8 шагов
+- `install.bat` — bootstrap-скрипт для Windows
+- `install.sh` — bootstrap-скрипт для macOS/Linux
+- `vercel.json` — конфигурация Vercel
 
 ## Интеграция с Leadteh
 
@@ -61,6 +67,15 @@
 Для подробного ознакомления с проектом и инструкций по клонированию для других аккаунтов Leadteh, смотрите:
 - [Полное руководство по проекту](PROJECT_GUIDE.md)
 
+## Переменные окружения (Vercel)
+
+| Переменная | Обязательная | Описание |
+|------------|-------------|----------|
+| `LEADTEH_API_TOKEN` | Нет | Токен API Leadteh для предзаполнения формы |
+| `TELEGRAM_BOT_TOKEN` | Нет | Токен Telegram-бота для HMAC-SHA256 верификации initData. Если не задан — верификация отключена |
+
+Переменные задаются через `setup.js` (шаги 5 и 6) или вручную в Vercel Dashboard → Settings → Environment Variables.
+
 ## Деплой
 
 Проект готов для деплоя на Vercel. Для корректной работы необходимо убедиться, что вебхук в Leadteh настроен правильно.
@@ -68,4 +83,4 @@
 ## Ссылки
 
 - [GitHub](https://github.com/Roman72-186/telegram-webapp)
-- [Vercel](https://telegram-webapp.vercel.app)
+- [Vercel](https://tg-registration.vercel.app)
