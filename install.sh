@@ -134,11 +134,17 @@ echo "[3/4] Клонирование репозитория..."
 
 if [ -d "$FOLDER_NAME" ]; then
     echo "Папка $FOLDER_NAME уже существует."
-    echo "Удалите её или переименуйте, затем запустите скрипт снова."
-    exit 1
+    if [ -d "$FOLDER_NAME/.git" ]; then
+        echo "Обновляю из репозитория (git pull)..."
+        git -C "$FOLDER_NAME" pull origin main
+    else
+        echo "Папка не является git-репозиторием."
+        echo "Удалите её или переименуйте, затем запустите скрипт снова."
+        exit 1
+    fi
+else
+    git clone "$REPO_URL" "$FOLDER_NAME"
 fi
-
-git clone "$REPO_URL" "$FOLDER_NAME"
 
 # ============================================
 # Шаг 4: Запуск setup.js

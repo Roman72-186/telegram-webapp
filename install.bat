@@ -127,10 +127,17 @@ echo [3/4] Клонирование репозитория...
 
 if exist "%FOLDER_NAME%" (
     echo Папка %FOLDER_NAME% уже существует.
-    echo Удалите её или переименуйте, затем запустите скрипт снова.
-    echo.
-    pause
-    exit /b 1
+    if exist "%FOLDER_NAME%\.git" (
+        echo Обновляю из репозитория (git pull^)...
+        git -C %FOLDER_NAME% pull origin main
+    ) else (
+        echo Папка не является git-репозиторием.
+        echo Удалите её или переименуйте, затем запустите скрипт снова.
+        echo.
+        pause
+        exit /b 1
+    )
+    goto :run_setup
 )
 
 git clone %REPO_URL% %FOLDER_NAME%
@@ -146,6 +153,7 @@ if %errorlevel% neq 0 (
 :: ============================================
 :: Шаг 4: Запуск setup.js
 :: ============================================
+:run_setup
 echo.
 echo [4/4] Запуск мастера установки...
 echo.
