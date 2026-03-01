@@ -16,9 +16,22 @@ echo ""
 # ============================================
 echo "[1/4] Проверка Git..."
 
-# На macOS /usr/bin/git — shim, который требует Xcode CLI tools.
-# Проверяем через git --version, а не command -v git.
-if git --version &>/dev/null; then
+# На macOS /usr/bin/git — shim, который без Xcode CLI tools
+# показывает GUI-диалог при любом вызове (включая git --version).
+# Поэтому на macOS сначала проверяем xcode-select -p (тихо, без диалога).
+GIT_OK=false
+
+if [ "$(uname -s)" = "Darwin" ]; then
+    if xcode-select -p &>/dev/null; then
+        GIT_OK=true
+    fi
+else
+    if command -v git &>/dev/null; then
+        GIT_OK=true
+    fi
+fi
+
+if [ "$GIT_OK" = true ]; then
     echo "Git найден — OK"
 else
     echo "Git не найден. Пробую установить..."
@@ -28,10 +41,12 @@ else
 
     case "$OS" in
         Darwin)
-            echo "macOS: запускаю xcode-select --install..."
+            echo "macOS: для работы с Git нужны Command Line Tools."
+            echo "Запускаю установку..."
+            echo ""
             xcode-select --install 2>/dev/null || true
             echo ""
-            echo "Если открылось окно установки — дождитесь завершения,"
+            echo "Дождитесь завершения установки в открывшемся окне,"
             echo "затем перезапустите этот скрипт."
             echo ""
             exit 0
