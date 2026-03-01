@@ -169,4 +169,6 @@ echo "[4/4] Запуск мастера установки..."
 echo ""
 
 cd "$FOLDER_NAME"
-node setup.js
+# При запуске через curl | bash stdin — это пайп, а не терминал.
+# Перенаправляем stdin на /dev/tty, чтобы setup.js мог читать ввод пользователя.
+node setup.js < /dev/tty
