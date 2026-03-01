@@ -202,14 +202,18 @@ async function ensureVercel(rl) {
     return;
   }
 
+  // На macOS/Linux глобальная установка npm требует sudo
+  const needSudo = process.platform !== 'win32';
+  const installCmd = needSudo ? 'sudo npm i -g vercel' : 'npm i -g vercel';
+
   console.log('');
   console.log('Vercel CLI не найден. Он нужен для деплоя проекта.');
-  const yes = await confirm(rl, 'Установить Vercel CLI глобально (npm i -g vercel)?');
+  const yes = await confirm(rl, `Установить Vercel CLI глобально (${installCmd})?`);
 
   if (!yes) {
     console.log('');
     console.log('Деплой пропущен. Вы можете установить Vercel CLI позже:');
-    console.log('  npm i -g vercel');
+    console.log(`  ${installCmd}`);
     console.log('  vercel --prod');
     return;
   }
@@ -217,11 +221,11 @@ async function ensureVercel(rl) {
   console.log('');
   console.log('Устанавливаю Vercel CLI...');
   try {
-    execSync('npm i -g vercel', { stdio: 'inherit' });
+    execSync(installCmd, { stdio: 'inherit' });
     console.log('Vercel CLI установлен — OK');
   } catch {
     console.error('Ошибка при установке Vercel CLI.');
-    console.error('Попробуйте установить вручную: npm i -g vercel');
+    console.error(`Попробуйте установить вручную: ${installCmd}`);
     return;
   }
 }
