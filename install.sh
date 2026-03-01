@@ -16,7 +16,9 @@ echo ""
 # ============================================
 echo "[1/4] Проверка Git..."
 
-if command -v git &>/dev/null; then
+# На macOS /usr/bin/git — shim, который требует Xcode CLI tools.
+# Проверяем через git --version, а не command -v git.
+if git --version &>/dev/null; then
     echo "Git найден — OK"
 else
     echo "Git не найден. Пробую установить..."
