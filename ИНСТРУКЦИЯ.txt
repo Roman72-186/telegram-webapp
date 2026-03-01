@@ -203,6 +203,37 @@
   → Проверьте Webhook URL в api/submit.js.
 
 
+УСТАНОВКА ДЛЯ ДРУГОГО БОТА
+----------------------------
+Если вы хотите подключить ещё одного бота (другой аккаунт Leadteh),
+нужна отдельная копия проекта и отдельный деплой на Vercel.
+
+Каждый бот = отдельная папка + отдельный проект Vercel + свой URL.
+
+  Windows:
+    1. Откройте командную строку
+    2. git clone https://github.com/Roman72-186/telegram-webapp.git telegram-webapp-bot2
+    3. cd telegram-webapp-bot2
+    4. node setup.js
+    5. Укажите данные нового бота (webhook, токены и т.д.)
+
+  macOS / Linux:
+    1. Откройте терминал
+    2. git clone https://github.com/Roman72-186/telegram-webapp.git telegram-webapp-bot2
+    3. cd telegram-webapp-bot2
+    4. node setup.js < /dev/tty
+    5. Укажите данные нового бота (webhook, токены и т.д.)
+
+  Для каждого бота указываются СВОИ:
+    - Webhook URL (от своего аккаунта Leadteh)
+    - API-токен Leadteh
+    - Токен Telegram-бота
+    - Ссылки на документы (могут совпадать)
+
+  При деплое Vercel создаст новый проект с новым URL.
+  Этот URL указываете в настройках нового бота.
+
+
 ОБНОВЛЕНИЕ
 -----------
 Если вышла новая версия:
@@ -218,3 +249,8 @@
     vercel --prod
 
   Или просто перезапустите install.sh — он сам обновит проект.
+
+  Если у вас несколько ботов — обновите каждую папку отдельно:
+    cd ~/telegram-webapp-bot2
+    git pull origin main
+    vercel --prod
