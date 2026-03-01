@@ -324,11 +324,33 @@ function setVercelEnvVar(name, value) {
   });
 }
 
+async function askBotToken(rl) {
+  console.log('');
+  console.log('Токен бота нужен для верификации запросов из Telegram (HMAC-SHA256).');
+  console.log('Это повышает безопасность — сервер будет проверять подпись initData.');
+  console.log('Где найти: @BotFather → /mybots → выберите бота → API Token');
+  console.log('');
+  console.log('Если пропустить — форма будет работать без верификации.');
+  console.log('');
+
+  const token = await ask(rl, 'Введите токен Telegram-бота (Enter — пропустить): ');
+  const trimmed = (token || '').trim();
+
+  if (!trimmed) {
+    console.log('  → Пропущено. Верификация initData будет отключена.');
+    console.log('  → Вы можете добавить переменную TELEGRAM_BOT_TOKEN позже');
+    console.log('    в Vercel Dashboard → Project → Settings → Environment Variables');
+    return null;
+  }
+
+  return trimmed;
+}
+
 async function main() {
   printBanner();
 
   // Шаг 1: Проверка окружения
-  console.log('[1/7] Проверка окружения...');
+  console.log('[1/8] Проверка окружения...');
   checkNodeVersion();
   checkGit();
 
@@ -340,63 +362,80 @@ async function main() {
   try {
     // Шаг 2: Запрос Webhook URL
     console.log('');
-    console.log('[2/7] Настройка Webhook URL...');
+    console.log('[2/8] Настройка Webhook URL...');
     const webhookUrl = await askWebhookUrl(rl);
 
     // Шаг 3: Подстановка webhook в код
-    console.log('[3/7] Обновление конфигурации...');
+    console.log('[3/8] Обновление конфигурации...');
     replaceWebhookUrl(webhookUrl);
 
     // Шаг 4: Ссылки на документы
     console.log('');
-    console.log('[4/7] Настройка ссылок на документы...');
+    console.log('[4/8] Настройка ссылок на документы...');
     const docUrls = await askDocumentUrls(rl);
     replaceDocumentUrls(docUrls);
 
     // Шаг 5: API-токен Leadteh
     console.log('');
-    console.log('[5/7] API-токен Leadteh (для предзаполнения формы)...');
+    console.log('[5/8] API-токен Leadteh (для предзаполнения формы)...');
     const apiToken = await askApiToken(rl);
 
-    // Шаг 6: Проверка Vercel CLI
+    // Шаг 6: Токен Telegram-бота (для верификации initData)
     console.log('');
-    console.log('[6/7] Проверка Vercel CLI...');
+    console.log('[6/8] Токен Telegram-бота (для верификации запросов)...');
+    const botToken = await askBotToken(rl);
+
+    // Шаг 7: Проверка Vercel CLI
+    console.log('');
+    console.log('[7/8] Проверка Vercel CLI...');
     await ensureVercel(rl);
 
-    // Шаг 7: Деплой
-    console.log('[7/7] Деплой на Vercel...');
+    // Шаг 8: Деплой
+    console.log('[8/8] Деплой на Vercel...');
     const deployUrl = await deployToVercel(rl);
 
-    // Установка env-переменной после деплоя (проект уже привязан к Vercel)
-    if (apiToken && deployUrl && isVercelInstalled()) {
+    // Установка env-переменных после деплоя (проект уже привязан к Vercel)
+    const envVars = [];
+    if (apiToken) envVars.push({ name: 'LEADTEH_API_TOKEN', value: apiToken });
+    if (botToken) envVars.push({ name: 'TELEGRAM_BOT_TOKEN', value: botToken });
+
+    if (envVars.length > 0 && deployUrl && isVercelInstalled()) {
       console.log('');
-      console.log('Устанавливаю переменную LEADTEH_API_TOKEN на Vercel...');
+      console.log('Устанавливаю переменные окружения на Vercel...');
       try {
-        setVercelEnvVar('LEADTEH_API_TOKEN', apiToken);
-        console.log('LEADTEH_API_TOKEN установлен — OK');
+        for (const { name, value } of envVars) {
+          setVercelEnvVar(name, value);
+          console.log(`${name} установлен — OK`);
+        }
         console.log('');
-        console.log('Повторный деплой для применения переменной...');
+        console.log('Повторный деплой для применения переменных...');
         try {
           execSync('vercel --prod --yes', {
             stdio: ['inherit', 'pipe', 'inherit'],
             encoding: 'utf-8',
           });
-          console.log('Переменная применена — OK');
+          console.log('Переменные применены — OK');
         } catch {
           console.log('Не удалось повторно задеплоить. Выполните вручную: vercel --prod');
         }
       } catch {
-        console.log('Не удалось установить переменную автоматически.');
+        console.log('Не удалось установить переменные автоматически.');
         console.log('Добавьте вручную в Vercel Dashboard → Settings → Environment Variables:');
-        console.log('  Имя: LEADTEH_API_TOKEN');
-        console.log(`  Значение: ${apiToken}`);
+        for (const { name, value } of envVars) {
+          console.log(`  Имя: ${name}`);
+          console.log(`  Значение: ${value}`);
+          console.log('');
+        }
       }
-    } else if (apiToken && !deployUrl) {
+    } else if (envVars.length > 0 && !deployUrl) {
       console.log('');
-      console.log('После деплоя добавьте переменную LEADTEH_API_TOKEN в Vercel:');
+      console.log('После деплоя добавьте переменные в Vercel:');
       console.log('  Vercel Dashboard → Project → Settings → Environment Variables');
-      console.log('  Имя: LEADTEH_API_TOKEN');
-      console.log(`  Значение: ${apiToken}`);
+      for (const { name, value } of envVars) {
+        console.log(`  Имя: ${name}`);
+        console.log(`  Значение: ${value}`);
+        console.log('');
+      }
     }
 
     // Финал

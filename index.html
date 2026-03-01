@@ -103,7 +103,7 @@
 
 <body class="min-h-screen flex flex-col">
   <!-- Header -->
-  <header class="bg-white shadow-sm py-6 px-4">
+  <header class="shadow-sm py-6 px-4" style="background:var(--tg-theme-bg-color)">
     <div class="max-w-2xl mx-auto">
       <h1 class="text-3xl font-bold text-gray-900 text-center mb-2">Добро пожаловать!</h1>
       <p class="text-gray-600 text-center">Заполните форму регистрации для доступа к нашему сервису</p>
@@ -113,7 +113,7 @@
   <!-- Main -->
   <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-8">
     <!-- Form -->
-    <div id="registrationForm" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+    <div id="registrationForm" class="rounded-2xl shadow-lg p-6 md:p-8" style="background:var(--tg-theme-bg-color)">
       <form id="form" class="space-y-6" novalidate>
         <!-- First Name -->
         <div>
@@ -381,11 +381,6 @@
         }
       };
 
-      if (window.Telegram && window.Telegram.WebApp) {
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
-      }
-          
       submitBtn.disabled = true;
       loadingIndicator.classList.remove('hidden');
 
@@ -404,7 +399,7 @@
         registrationForm.classList.add('hidden');
         successMessage.classList.add('show');
 
-        if (tg) { try { tg.close(); } catch (_) {} }
+        if (tg) { setTimeout(() => { try { tg.close(); } catch (_) {} }, 1500); }
       } catch (err) {
         showFatal(`Произошла ошибка при отправке данных: ${err && err.message ? err.message : 'неизвестная ошибка'}`);
       } finally {

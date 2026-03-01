@@ -1,4 +1,22 @@
 // api/submit.js (Vercel Serverless Function)
+const crypto = require('crypto');
+
+// Верификация initData по HMAC-SHA256 (Telegram Web App)
+function verifyInitData(initData, botToken) {
+  if (!initData || !botToken) return false;
+  const params = new URLSearchParams(initData);
+  const hash = params.get('hash');
+  if (!hash) return false;
+  params.delete('hash');
+  const checkString = [...params.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${k}=${v}`)
+    .join('\n');
+  const secret = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest();
+  const computed = crypto.createHmac('sha256', secret).update(checkString).digest('hex');
+  return computed === hash;
+}
+
 module.exports = async (req, res) => {
   try {
     if (req.method !== 'POST') {
@@ -17,7 +35,21 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Invalid JSON body' });
     }
 
+    // Верификация initData (если задан TELEGRAM_BOT_TOKEN)
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    if (botToken) {
+      const initData = body.telegram && body.telegram.initData;
+      if (!verifyInitData(initData, botToken)) {
+        return res.status(403).json({ error: 'Invalid Telegram initData signature' });
+      }
+    }
+
     const telegram_id = body.telegram_id ?? null;
+
+    // Валидация telegram_id — должен быть положительным целым числом
+    if (telegram_id !== null && (!Number.isInteger(telegram_id) || telegram_id <= 0)) {
+      return res.status(400).json({ error: 'telegram_id must be a positive integer' });
+    }
 
     const firstName = String(body.firstName || '').trim();
     const lastName  = String(body.lastName  || '').trim();
